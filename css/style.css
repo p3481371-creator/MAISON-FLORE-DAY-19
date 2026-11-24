@@ -653,3 +653,45 @@ body::after{ /* paper grain */
   .dock__f select{min-width:0;font-size:1.15rem}
   .dock__go{width:100%;margin:0}
 }
+
+/* =========================================================
+   v5 — loader: a garden that grows while the site loads
+   ========================================================= */
+.loader{display:block!important;overflow:hidden;background:#FBF7F2;--h:0px;--hx:50%;--hy:45%;clip-path:none!important}
+.loader.is-out{-webkit-mask-image:radial-gradient(circle at var(--hx) var(--hy),transparent var(--h),#000 calc(var(--h) + 1.5px));mask-image:radial-gradient(circle at var(--hx) var(--hy),transparent var(--h),#000 calc(var(--h) + 1.5px))}
+.loader__wash{position:absolute;inset:-20%;background:
+  radial-gradient(40% 35% at 50% 42%,#fff 0%,rgba(255,255,255,0) 70%),
+  radial-gradient(35% 30% at 18% 20%,rgba(242,212,208,.7),transparent 70%),
+  radial-gradient(35% 30% at 85% 78%,rgba(243,227,181,.55),transparent 70%),
+  radial-gradient(30% 30% at 88% 15%,rgba(220,207,232,.5),transparent 70%),
+  radial-gradient(30% 30% at 12% 85%,rgba(201,213,195,.55),transparent 70%);animation:wash 9s ease-in-out infinite alternate}
+@keyframes wash{to{transform:rotate(8deg) scale(1.08)}}
+.lc{position:absolute;top:28px;font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink);font-weight:600;z-index:2}
+.lc span{display:block;font-weight:400;color:var(--ink-2);margin-top:.3rem;letter-spacing:.18em}
+.lc--tl{left:32px}.lc--tr{right:32px;display:flex;align-items:center;gap:.6rem}
+.lc--tr span{margin:0;display:inline-block;font-family:var(--serif);font-style:italic;text-transform:none;letter-spacing:.02em;font-size:1.05rem;color:var(--ink-2)}
+.lc__dot{width:7px!important;height:7px;border-radius:50%;background:var(--rose);animation:live 1.6s infinite;box-shadow:0 0 0 0 rgba(194,91,110,.5)}
+.loader__stage{position:absolute;left:50%;top:44%;width:300px;height:430px;transform:translate(-50%,-48%);z-index:2}
+.loader__ringtext{position:absolute;left:0;top:0;width:300px;height:300px;animation:spin 22s linear infinite;opacity:0}
+.loader__ringtext text{font-family:var(--sans);font-size:11px;letter-spacing:3px;fill:var(--gold);font-weight:600}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader__plant{position:absolute;left:50px;top:66px;width:200px;height:320px;overflow:visible}
+.lp-stem{fill:none;stroke:var(--sage-deep);stroke-width:2.2;stroke-linecap:round}
+.lp-leaf{fill:var(--sage)}
+.lp-bud{fill:var(--blush-2)}
+.loader__bloom{position:absolute;left:50%;top:150px;width:170px;margin:-85px 0 0 -85px;transform:scale(0);filter:drop-shadow(0 24px 30px rgba(140,70,80,.25));will-change:transform}
+.loader__word{position:absolute;left:0;right:0;top:calc(44% + 205px);text-align:center;font-family:var(--serif);font-weight:300;font-size:clamp(2rem,4.4vw,3.4rem);letter-spacing:.2em;text-transform:uppercase;color:var(--ink);z-index:2;white-space:nowrap}
+.loader__word em{color:var(--rose);text-transform:none;letter-spacing:.05em}
+.loader__word span{display:inline-block;opacity:.08;transform:translateY(14px);filter:blur(6px);transition:opacity .8s var(--ease),transform .9s var(--ease),filter .8s}
+.loader__word span.on{opacity:1;transform:none;filter:none}
+.loader__count{position:absolute;right:4vw;bottom:5vh;z-index:2;font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(4.5rem,13vw,11rem);line-height:.8;color:var(--rose-deep);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.loader__count sup{font-size:.28em;vertical-align:top;margin-left:.1em;color:var(--ink-2)}
+.loader__bar{position:absolute;left:32px;right:32px;bottom:28px;height:1px;background:rgba(59,42,49,.12);z-index:2}
+.loader__bar i{position:absolute;inset:0;background:linear-gradient(90deg,var(--sage-deep),var(--rose));transform-origin:left;transform:scaleX(0)}
+@media (max-width:640px){
+  .loader__stage{transform:translate(-50%,-48%) scale(.8)}
+  .loader__word{top:calc(44% + 160px);letter-spacing:.12em}
+  .lc--tr{top:auto;bottom:56px;left:32px;right:auto}
+  .loader__count{bottom:9vh}
+}
+.loader__word .sp{display:inline-block;width:.45em}

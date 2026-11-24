@@ -54,11 +54,31 @@ const critical = [
   ...['peony','peony2','rose_blush','rose_peach','rose_mauve','rose_mauve2','ranunculus_white','ranunculus_yellow','ranunculus_cream','cherry','cherry2','vine','vine2','wild'].map(F),
 ];
 async function boot(){
-  const ring = $('.loader__ring circle'), pct = $('#loaderPct');
+  const L = $('#loader'), pct = $('#loaderPct'), bar = $('#loaderBar'), status = $('#loaderStatus');
+  const stem = $('.lp-stem'), leaves = $$('.lp-leaf'), bud = $('.lp-bud'), bloomEl = $('.loader__bloom');
+  const letters = $$('.loader__word span:not(.sp)');
+  const len = stem.getTotalLength(); gsap.set(stem, {strokeDasharray: len, strokeDashoffset: len});
+  [['100 252'], ['102 196'], ['99 138']].forEach(([o], i) => gsap.set(leaves[i], {svgOrigin: o, scale: 0}));
+  gsap.set(bud, {svgOrigin: '100 82', scale: 0});
+  gsap.to('.loader__ringtext', {opacity: 1, duration: 1.4, ease: 'power2.out', delay: .2});
+  const STATUS = ['Opening the glasshouse', 'Watering the roses', 'Cutting stems at dawn', 'Tying the silk ribbon', 'Almost in bloom'];
+  const leafAt = [.22, .4, .58], ui = {p: 0}; const leafOn = [false, false, false]; let budOn = false, st = -1;
+  const render = () => {
+    const p = ui.p;
+    pct.textContent = Math.round(p * 100);
+    bar.style.transform = `scaleX(${p})`;
+    stem.style.strokeDashoffset = len * (1 - Math.min(1, p / .8));
+    leafAt.forEach((a, i) => { if (!leafOn[i] && p >= a) { leafOn[i] = true; gsap.to(leaves[i], {scale: 1, duration: 1.2, ease: 'elastic.out(1,.5)'}); } });
+    if (!budOn && p >= .8) { budOn = true; gsap.to(bud, {scale: 1, duration: .8, ease: 'back.out(3)'}); }
+    letters.forEach((l, i) => l.classList.toggle('on', p >= (i + 1) / (letters.length + 1)));
+    const si = Math.min(STATUS.length - 1, Math.floor(p * STATUS.length));
+    if (si !== st) { st = si; gsap.fromTo(status, {y: 10, opacity: 0}, {y: 0, opacity: 1, duration: .6, ease: 'expo.out', onStart: () => { status.textContent = STATUS[si]; }}); }
+  };
+  const started = performance.now();
   const firstFrames = 48;
   const total = critical.length + firstFrames;
   let done = 0;
-  const tick = () => { done++; const p = done / total; pct.textContent = Math.round(p * 100); ring.style.setProperty('--o', 352 - 352 * p); };
+  const tick = () => { done++; gsap.to(ui, {p: Math.min(.97, done / total), duration: .9, ease: 'power2.out', overwrite: true, onUpdate: render}); };
   const tasks = critical.map(s => loadImg(s).then(tick));
   for (let i = 0; i < firstFrames; i++) tasks.push(loadImg(frameSrc(i)).then(im => { frames[i] = im; tick(); }));
   await Promise.all([Promise.all(tasks), document.fonts ? document.fonts.ready : null]);
@@ -66,12 +86,23 @@ async function boot(){
   (async () => { for (let i = firstFrames; i < FRAME_COUNT; i += 6) {
       await Promise.all(Array.from({length: Math.min(6, FRAME_COUNT - i)}, (_, k) => loadImg(frameSrc(i + k)).then(im => { frames[i + k] = im; })));
   }})();
-  gsap.timeline({onComplete: () => { $('#loader').remove(); }})
-    .to('.loader__rose', {scale: 1.5, rotate: 40, duration: .9, ease: 'expo.inOut'}, .1)
-    .to('.loader__word, .loader__pct, .loader__ring', {opacity: 0, y: -20, duration: .5, ease: 'power2.in'}, .1)
-    .to('#loader', {clipPath: 'circle(0% at 50% 50%)', duration: 1.3, ease: 'expo.inOut'}, .45);
-  document.body.classList.remove('is-loading');
-  start();
+  // let the garden finish growing (at least ~2.6s on screen)
+  const rest = Math.max(.9, 2.6 - (performance.now() - started) / 1000);
+  await new Promise(res => gsap.to(ui, {p: 1, duration: rest, ease: 'power2.inOut', overwrite: true, onUpdate: render, onComplete: res}));
+  // the bloom, then the garden opens through its heart
+  const r = bloomEl.getBoundingClientRect();
+  const hx = r.left + r.width / 2, hy = r.top + r.height / 2;
+  L.style.setProperty('--hx', hx + 'px'); L.style.setProperty('--hy', hy + 'px');
+  const tl = gsap.timeline({onComplete: () => L.remove()});
+  tl.to(bud, {scale: 0, duration: .3, ease: 'power2.in'}, 0)
+    .fromTo(bloomEl, {scale: 0, rotate: -160}, {scale: 1, rotate: 0, duration: 1.1, ease: 'elastic.out(1,.55)'}, .1)
+    .to('.loader__ringtext', {scale: 1.25, opacity: 0, duration: .9, ease: 'power3.in'}, .6)
+    .to(letters, {y: -30, opacity: 0, filter: 'blur(8px)', duration: .6, ease: 'power3.in', stagger: .03}, .7)
+    .to('.loader__count, .lc, .loader__bar', {opacity: 0, y: 20, duration: .5, ease: 'power2.in'}, .7)
+    .to(['.loader__plant'], {opacity: 0, y: 40, duration: .6, ease: 'power2.in'}, .8)
+    .add(() => { L.classList.add('is-out'); document.body.classList.remove('is-loading'); start(); }, 1.05)
+    .to(L, {'--h': Math.hypot(innerWidth, innerHeight) + 'px', duration: 1.4, ease: 'expo.inOut'}, 1.05)
+    .to(bloomEl, {scale: 7, rotate: 60, opacity: 0, filter: 'blur(10px)', duration: 1.3, ease: 'expo.in'}, 1.0);
 }
 
 /* ---------------------------------------------------------
@@ -229,7 +260,7 @@ function bloom(el){
 function initBloomText(){
   $$('[data-bloom]').forEach(el => {
     const tl = bloom(el);
-    if (el.dataset.bloom === 'hero') { gsap.delayedCall(1.2, () => tl.play(0)); return; }
+    if (el.dataset.bloom === 'hero') { gsap.delayedCall(.35, () => tl.play(0)); return; }
     ScrollTrigger.create({trigger: el, start: 'top 82%', once: true, onEnter: () => tl.play(0)});
   });
   // hero parallax on pointer
@@ -642,7 +673,7 @@ function initChrome(){
     onToggle: s => $$(`.nav__links a[href="#${id}"]`).forEach(a => a.classList.toggle('is-active', s.isActive))}));
   $$('[data-reveal]').forEach(el => {
     const inHero = el.closest('.hero');
-    gsap.to(el, {opacity: 1, y: 0, duration: 1.3, ease: 'expo.out', delay: inHero ? 1.1 + [...el.parentElement.children].indexOf(el) * .12 : 0,
+    gsap.to(el, {opacity: 1, y: 0, duration: 1.3, ease: 'expo.out', delay: inHero ? .55 + [...el.parentElement.children].indexOf(el) * .12 : 0,
       scrollTrigger: inHero ? null : {trigger: el, start: 'top 88%'}});
   });
   gsap.to('.hero__inner', {yPercent: -18, opacity: .2, ease: 'none', scrollTrigger: {trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true}});
@@ -952,7 +983,7 @@ function initWreath(){
   els.forEach((e, i) => {
     const dx = Math.cos(e.ang), dy = Math.sin(e.ang);
     gsap.fromTo(e.img, {x: dx * Wd * .55, y: dy * Hd * .55, scale: 0, rotate: (i % 2 ? 1 : -1) * 200, opacity: 0},
-      {x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, duration: 2.1, ease: 'expo.out', delay: 1.15 + Math.abs(Math.sin(e.ang)) * .5 + (i % 5) * .05,
+      {x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, duration: 2.1, ease: 'expo.out', delay: .25 + Math.abs(Math.sin(e.ang)) * .5 + (i % 5) * .05,
        onComplete: () => gsap.to(e.img, {rotate: (i % 2 ? 1 : -1) * (4 + Math.random() * 5), y: (i % 3 - 1) * 5, duration: 2.6 + Math.random() * 2, yoyo: true, repeat: -1, ease: 'sine.inOut'})});
   });
   // depth parallax with the pointer
@@ -999,12 +1030,12 @@ function initDock(){
     const r = $('.dock__go').getBoundingClientRect(); petalBurst(r.left + r.width / 2, r.top + r.height / 2, 18);
     setTimeout(() => { lenis ? lenis.scrollTo('#collection', {duration: 1.8}) : $('#collection').scrollIntoView({behavior: 'smooth'}); }, 250);
   });
-  gsap.fromTo('.hero__dock', {scale: .9}, {scale: 1, duration: 1.4, ease: 'elastic.out(1,.6)', delay: 2.1});
+  gsap.fromTo('.hero__dock', {scale: .9}, {scale: 1, duration: 1.4, ease: 'elastic.out(1,.6)', delay: 1.2});
 }
 
 function initLiveCards(){
   const cards = $$('.hcard'); if (!cards.length) return;
-  gsap.fromTo(cards, {y: 40, opacity: 0}, {y: 0, opacity: 1, duration: 1.3, ease: 'expo.out', stagger: .15, delay: 2.6});
+  gsap.fromTo(cards, {y: 40, opacity: 0}, {y: 0, opacity: 1, duration: 1.3, ease: 'expo.out', stagger: .15, delay: 1.6});
   gsap.to(cards, {y: -60, opacity: 0, ease: 'none', scrollTrigger: {trigger: '.hero', start: '10% top', end: '45% top', scrub: true}});
   const SLOTS = [[6, '8 – 11 am'], [9, '11 am – 2 pm'], [12, '2 – 5 pm'], [15, '5 – 8 pm']];
   const ring = $('#slotRing'), C = 2 * Math.PI * 19;

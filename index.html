@@ -20,12 +20,24 @@
 
 <!-- ============ LOADER ============ -->
 <div class="loader" id="loader" aria-hidden="true">
-  <div class="loader__bloom">
-    <img src="img/flowers/rose_blush.webp" alt="" class="loader__rose">
-    <svg class="loader__ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg>
+  <div class="loader__wash"></div>
+  <p class="lc lc--tl">Maison Flore<span>Est. MMXXVI · The Glasshouse</span></p>
+  <p class="lc lc--tr"><span class="lc__dot"></span><span id="loaderStatus">Opening the glasshouse</span></p>
+  <div class="loader__stage">
+    <svg class="loader__ringtext" viewBox="0 0 300 300"><defs><path id="lrc" d="M150,150 m-122,0 a122,122 0 1,1 244,0 a122,122 0 1,1 -244,0"/></defs>
+      <text><textPath href="#lrc" textLength="760">GLASSHOUSE GROWN · HAND-TIED DAILY · CUT AT DAWN · DELIVERED IN BLOOM ·</textPath></text></svg>
+    <svg class="loader__plant" viewBox="0 0 200 320">
+      <path class="lp-stem" d="M100,318 C94,268 110,222 100,172 S94,112 100,84"/>
+      <path class="lp-leaf" d="M100,252 q-34,-4 -50,-32 q34,-2 50,32z"/>
+      <path class="lp-leaf" d="M102,196 q34,-8 50,-38 q-36,2 -50,38z"/>
+      <path class="lp-leaf" d="M99,138 q-26,-6 -38,-28 q26,2 38,28z"/>
+      <circle class="lp-bud" cx="100" cy="82" r="9"/>
+    </svg>
+    <img class="loader__bloom" src="img/flowers/rose_blush.webp" alt="">
   </div>
-  <p class="loader__word">Maison <em>Flore</em></p>
-  <p class="loader__pct"><span id="loaderPct">0</span>%</p>
+  <h2 class="loader__word"><span>M</span><span>a</span><span>i</span><span>s</span><span>o</span><span>n</span><span class="sp"> </span><em><span>F</span><span>l</span><span>o</span><span>r</span><span>e</span></em></h2>
+  <div class="loader__count"><span id="loaderPct">0</span><sup>%</sup></div>
+  <div class="loader__bar"><i id="loaderBar"></i></div>
 </div>
 
 <!-- creatures layer (bee + butterfly) -->
