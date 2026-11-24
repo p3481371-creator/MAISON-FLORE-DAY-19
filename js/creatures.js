@@ -142,8 +142,8 @@ async function init(){
          next: performance.now() + 2500, wx: W * .3, wy: H * .4, walk: 0};
   b.root.position.set(fly.x, -fly.y, 0); e.root.position.set(bee.x, -bee.y, 0);
   gsap.fromTo([b.root.scale, e.root.scale], {x: 0, y: 0, z: 0}, {x: 1, y: 1, z: 1, duration: 1.4, ease: 'elastic.out(1,.5)', delay: .4});
-  renderer.setAnimationLoop(loop);
 }
+renderer.setAnimationLoop(loop);
 
 /* ---------- butterfly ---------- */
 function updateButterfly(dt, now){
@@ -243,11 +243,74 @@ function updateBee(dt, now){
   b.shadow.position.set(flying ? 14 : 4, flying ? -36 : -10, -400);
 }
 
+
+/* ---------- 3D petal field: drifts through the page, parts around the cursor ---------- */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PETALS = reduceMotion ? 0 : (W < 700 ? 16 : 44);
+const petalTex = (() => {
+  const c = document.createElement('canvas'); c.width = 64; c.height = 84; const g = c.getContext('2d');
+  g.beginPath(); g.moveTo(32, 82); g.bezierCurveTo(-8, 54, 2, 6, 32, 2); g.bezierCurveTo(62, 6, 72, 54, 32, 82); g.closePath();
+  const gr = g.createLinearGradient(0, 0, 0, 84); gr.addColorStop(0, '#ffffff'); gr.addColorStop(.55, '#f4f0f0'); gr.addColorStop(1, '#d6c8cb');
+  g.fillStyle = gr; g.fill();
+  g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(32, 78); g.quadraticCurveTo(29, 42, 32, 10); g.stroke();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+let petalMesh = null; const petals = [];
+if (PETALS) {
+  const geo = new THREE.PlaneGeometry(1, 1.3, 6, 6);
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), y = pos.getY(i); pos.setZ(i, x * x * .9 - y * y * .25); }
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshStandardMaterial({map: petalTex, transparent: true, alphaTest: .08, side: THREE.DoubleSide, roughness: .55, metalness: 0, depthWrite: false});
+  petalMesh = new THREE.InstancedMesh(geo, mat, PETALS);
+  petalMesh.frustumCulled = false;
+  const tints = ['#f6c6c4', '#efa3b1', '#fbe6b0', '#fff4ec', '#e0cfe8', '#f8d5cf'];
+  const col = new THREE.Color();
+  for (let i = 0; i < PETALS; i++) {
+    const z = Math.random();
+    petals.push({x: Math.random() * W, y: Math.random() * H, z, vx: 0, vy: 0, size: 12 + z * 18 + Math.random() * 6,
+      rx: Math.random() * 6, ry: Math.random() * 6, rz: Math.random() * 6, sx: (Math.random() - .5) * 2.2, sy: (Math.random() - .5) * 2.6, sz: (Math.random() - .5) * 1.4,
+      fall: 16 + z * 26 + Math.random() * 12, ph: Math.random() * 6.28});
+    petalMesh.setColorAt(i, col.set(tints[i % tints.length]));
+  }
+  scene.add(petalMesh);
+}
+const dummy = new THREE.Object3D();
+let lastScroll = scrollY, mvx = 0, mvy = 0, pmx = mouse.x, pmy = mouse.y;
+function updatePetals(dt){
+  if (!petalMesh) return;
+  const ds = scrollY - lastScroll; lastScroll = scrollY;
+  mvx = mvx * .85 + (mouse.x - pmx) * .15; mvy = mvy * .85 + (mouse.y - pmy) * .15; pmx = mouse.x; pmy = mouse.y;
+  for (let i = 0; i < petals.length; i++) {
+    const p = petals[i]; p.ph += dt;
+    // gravity + sway + scroll parallax
+    p.vy += (p.fall - p.vy) * dt * .8;
+    p.vx += (Math.sin(p.ph * .7 + i) * 22 - p.vx) * dt * .6;
+    p.y -= ds * (.35 + p.z * .55);
+    // cursor wind
+    const dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.hypot(dx, dy);
+    if (d < 170) { const f = (1 - d / 170); p.vx += (dx / (d + 1)) * f * 900 * dt + mvx * f * 4; p.vy += (dy / (d + 1)) * f * 900 * dt + mvy * f * 4; p.sx += f * dt * 6; }
+    p.vx *= 1 - dt * .9; p.vy *= 1 - dt * .4;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.y > H + 50) { p.y = -40; p.x = Math.random() * W; p.vx = 0; }
+    if (p.y < -80) { p.y = H + 40; p.x = Math.random() * W; }
+    if (p.x < -60) p.x = W + 40; if (p.x > W + 60) p.x = -40;
+    p.sx *= 1 - dt * .3; if (Math.abs(p.sx) < .6) p.sx = Math.sign(p.sx || 1) * .6;
+    p.rx += p.sx * dt; p.ry += p.sy * dt; p.rz += p.sz * dt;
+    dummy.position.set(p.x, -p.y, -300 + p.z * 600);
+    dummy.rotation.set(p.rx, p.ry, p.rz);
+    dummy.scale.setScalar(p.size);
+    dummy.updateMatrix(); petalMesh.setMatrixAt(i, dummy.matrix);
+  }
+  petalMesh.instanceMatrix.needsUpdate = true;
+}
+
 let lastT = performance.now();
 function loop(){
   const now = performance.now(); const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
   if (fly) updateButterfly(dt, now);
   if (bee) updateBee(dt, now);
+  updatePetals(dt);
   renderer.render(scene, camera);
 }
 

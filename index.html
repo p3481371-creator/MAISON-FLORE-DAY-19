@@ -32,6 +32,10 @@
 <canvas id="creatures" aria-hidden="true"></canvas>
 <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__ring"></span><span class="cursor__label" id="cursorLabel"></span></div>
 <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
+<nav class="vprog" id="vprog" aria-label="Sections">
+  <svg viewBox="0 0 40 600" preserveAspectRatio="none" aria-hidden="true"><path class="vprog__bg" d="M20,0 C34,60 6,120 20,180 S34,300 20,360 S6,480 20,600"/><path class="vprog__fg" id="vprogPath" d="M20,0 C34,60 6,120 20,180 S34,300 20,360 S6,480 20,600"/></svg>
+  <div class="vprog__nodes" id="vprogNodes"></div>
+</nav>
 
 <!-- ============ NAV ============ -->
 <header class="nav" id="nav">
@@ -340,6 +344,10 @@
     <div><p class="label">Garden</p><a href="#garden">The glasshouse</a><a href="#book">Garden visits</a><a href="#book">Workshops</a></div>
     <div><p class="label">Visit</p><p>The Glasshouse, Maison Flore</p><p>Open daily · 8am – 7pm</p></div>
     <div><p class="label">Follow</p><a href="#" aria-label="Instagram">Instagram</a><a href="#">Pinterest</a></div>
+  </div>
+  <div class="meadow" id="meadow">
+    <p class="meadow__hint">Wander through the meadow · click to scatter petals</p>
+    <canvas id="meadowCanvas" aria-hidden="true"></canvas>
   </div>
   <p class="footer__note">Concept website · sample products and prices · not a real store</p>
 </footer>

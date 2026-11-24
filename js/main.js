@@ -66,7 +66,10 @@ async function boot(){
   (async () => { for (let i = firstFrames; i < FRAME_COUNT; i += 6) {
       await Promise.all(Array.from({length: Math.min(6, FRAME_COUNT - i)}, (_, k) => loadImg(frameSrc(i + k)).then(im => { frames[i + k] = im; })));
   }})();
-  gsap.to('#loader', {autoAlpha: 0, duration: .9, ease: 'power2.inOut', delay: .2, onComplete: () => { $('#loader').remove(); }});
+  gsap.timeline({onComplete: () => { $('#loader').remove(); }})
+    .to('.loader__rose', {scale: 1.5, rotate: 40, duration: .9, ease: 'expo.inOut'}, .1)
+    .to('.loader__word, .loader__pct, .loader__ring', {opacity: 0, y: -20, duration: .5, ease: 'power2.in'}, .1)
+    .to('#loader', {clipPath: 'circle(0% at 50% 50%)', duration: 1.3, ease: 'expo.inOut'}, .45);
   document.body.classList.remove('is-loading');
   start();
 }
@@ -219,7 +222,6 @@ function bloom(el){
     .to(decos, {scale: 1, opacity: 1, rotate: i => +decos[i].dataset.r, duration: big ? 1.8 : 1.4, ease: 'elastic.out(1,.55)', stagger: {each: big ? .09 : .08, from: 'random'}}, big ? .45 : .25)
     .add(() => { // idle sway + petals shed from the bouquet
       decos.forEach((d, i) => gsap.to(d, {rotate: '+=' + (i % 2 ? 5 : -5), y: i % 3 ? -4 : 4, duration: 3 + (i % 4), yoyo: true, repeat: -1, ease: 'sine.inOut'}));
-      if (big) petalShower(el, 14);
     });
   const oflower = $('.o-flower', el);
   if (oflower) tl.fromTo(oflower, {rotate: -220, scale: 0}, {rotate: 0, scale: 1, duration: 1.8, ease: 'elastic.out(1,.5)'}, .5);
@@ -321,10 +323,13 @@ function initFilm(){
 /* ---------------------------------------------------------
    COLLECTION
 --------------------------------------------------------- */
+const PEEKS = [['rose_blush','ranunculus_white'],['peony','vine'],['rose_mauve2','rose_peach'],['ranunculus_yellow','wild'],['rose_peach','cherry'],['wild','rose_mauve'],['peony2','ranunculus_cream'],['rose_mauve','ranunculus_white'],['cherry2','rose_blush']];
 function initCollection(){
   const grid = $('#productGrid');
-  grid.innerHTML = PRODUCTS.map(p => `
+  grid.innerHTML = PRODUCTS.map((p, i) => `
     <article class="card" data-cat="${p.cat.join(' ')}" data-id="${p.id}">
+      <span class="card__peek card__peek--l" aria-hidden="true"><img src="${F(PEEKS[i % PEEKS.length][0])}" alt="" loading="lazy"></span>
+      <span class="card__peek card__peek--r" aria-hidden="true"><img src="${F(PEEKS[i % PEEKS.length][1])}" alt="" loading="lazy"></span>
       <div class="card__media">
         <img src="img/shop/${p.id}.webp" alt="${p.name} bouquet — ${p.desc}" loading="lazy">
         <span class="card__tag">${p.tag}</span>
@@ -814,6 +819,110 @@ function initJournal(){
   });
 }
 
+
+/* ---------------------------------------------------------
+   V3 — VINE PROGRESS
+--------------------------------------------------------- */
+const VSECT = [['top','Maison','rose_blush'],['film','The bloom','rose_peach'],['ritual','The ritual','cherry2'],['collection','Collection','peony'],['atelier','Atelier','ranunculus_white'],['season','In bloom','ranunculus_yellow'],['garden','The garden','rose_mauve2'],['book','Book a visit','peony2'],['journal','Journal','wild']];
+function initVineProgress(){
+  const wrap = $('#vprog'); if (!wrap || getComputedStyle(wrap).display === 'none') return;
+  const path = $('#vprogPath'), len = path.getTotalLength(), box = $('#vprogNodes');
+  gsap.set(path, {strokeDasharray: len, strokeDashoffset: len});
+  const nodes = VSECT.map(([id, name, f]) => {
+    const b = document.createElement('button'); b.className = 'vprog__node'; b.setAttribute('aria-label', name);
+    b.innerHTML = `<img src="${F(f)}" alt=""><span class="vprog__lbl">${name}</span>`;
+    b.addEventListener('click', () => { const t = $('#' + id); lenis ? lenis.scrollTo(t, {duration: 1.8}) : t.scrollIntoView({behavior: 'smooth'}); });
+    box.appendChild(b); return {b, id, f: 0};
+  });
+  const place = () => {
+    const max = document.documentElement.scrollHeight - innerHeight, h = wrap.clientHeight, w = wrap.clientWidth;
+    nodes.forEach(n => {
+      const el = $('#' + n.id); n.f = el ? Math.min(1, Math.max(0, (el.getBoundingClientRect().top + scrollY) / max)) : 0;
+      const pt = path.getPointAtLength(n.f * len);
+      n.b.style.left = pt.x * w / 40 + 'px'; n.b.style.top = pt.y * h / 600 + 'px';
+    });
+  };
+  ScrollTrigger.addEventListener('refresh', place); place();
+  const update = p => {
+    gsap.set(path, {strokeDashoffset: len * (1 - p)});
+    let cur = 0; nodes.forEach((n, i) => { const on = p >= n.f - .002; n.b.classList.toggle('is-on', on); if (on) cur = i; });
+    nodes.forEach((n, i) => n.b.classList.toggle('is-cur', i === cur));
+  };
+  ScrollTrigger.create({start: 0, end: 'max', onUpdate: st => update(st.progress)}); update(0);
+  gsap.from(wrap, {opacity: 0, x: -30, duration: 1.4, ease: 'expo.out', delay: 1.8});
+}
+
+/* ---------------------------------------------------------
+   V3 — HERO light that follows the cursor
+--------------------------------------------------------- */
+function initHeroLight(){
+  if (isTouch) return;
+  const g = $('.hero__glow'), o = {x: 50, y: 52};
+  addEventListener('pointermove', e => {
+    if (scrollY > innerHeight) return;
+    gsap.to(o, {x: e.clientX / innerWidth * 100, y: e.clientY / innerHeight * 100, duration: 1.6, ease: 'power3.out', overwrite: true,
+      onUpdate: () => { g.style.setProperty('--gx', o.x + '%'); g.style.setProperty('--gy', o.y + '%'); }});
+  }, {passive: true});
+}
+
+/* ---------------------------------------------------------
+   V3 — MEADOW
+--------------------------------------------------------- */
+function initMeadow(){
+  const cv = $('#meadowCanvas'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const names = ['rose_blush','peony','ranunculus_white','ranunculus_yellow','rose_mauve','rose_peach','peony2','ranunculus_cream','wild','rose_mauve2'];
+  const spr = {};
+  names.forEach(n => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'), k = Math.min(160 / im.width, 160 / im.height); c.width = im.width * k; c.height = im.height * k; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); spr[n] = c; }; im.src = F(n); });
+  let W = 0, H = 0, stems = [];
+  const build = () => {
+    const d = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+    stems = []; const gap = W < 700 ? 20 : 17;
+    for (let x = -12; x < W + 12; x += gap * (.55 + Math.random() * .9)) {
+      const back = Math.random() < .45;
+      stems.push({x, h: H * (back ? .42 : .52) + Math.random() * H * .34, f: names[Math.floor(Math.random() * names.length)], s: (back ? 24 : 34) + Math.random() * (back ? 18 : 30), ph: Math.random() * 6.28, a: 0, va: 0, back, leaf: Math.random() < .7, ls: Math.random() < .5 ? -1 : 1});
+    }
+    stems.sort((a, b) => (b.back - a.back) || (a.h - b.h));
+  };
+  build(); addEventListener('resize', () => setTimeout(build, 150));
+  const m = {x: -999, y: -999, vx: 0, lx: 0};
+  const host = cv.parentElement;
+  host.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); m.x = e.clientX - r.left; m.y = e.clientY - r.top; m.vx += (m.x - m.lx) * .5; m.lx = m.x; });
+  host.addEventListener('pointerleave', () => { m.x = m.y = -999; });
+  host.addEventListener('click', e => {
+    const r = cv.getBoundingClientRect(), cx = e.clientX - r.left;
+    stems.forEach(s => { const d = Math.abs(s.x - cx); if (d < 220) s.va += (s.x > cx ? 1 : -1) * (1 - d / 220) * 7; });
+    petalBurst(e.clientX, e.clientY, 22);
+  });
+  let vis = false; new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(cv);
+  let t = 0;
+  gsap.ticker.add((time, dms) => {
+    if (!vis) return;
+    const dt = Math.min(.05, dms / 1000); t += dt; m.vx *= .9;
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stems) {
+      const tipY = H - s.h, dx = s.x - m.x, dy = (tipY + s.h * .3) - m.y, d = Math.hypot(dx, dy * .55);
+      let target = Math.sin(t * 1.15 + s.ph + s.x * .012) * .07 + Math.sin(t * .4 + s.x * .003) * .05;
+      if (d < 150) target += Math.sign(dx || 1) * (1 - d / 150) * .62 + gsap.utils.clamp(-.4, .4, m.vx * .006);
+      const acc = (target - s.a) * 38 - s.va * 5.5; s.va += acc * dt; s.a += s.va * dt;
+      const sa = Math.sin(s.a), ca = Math.cos(s.a);
+      const tx = s.x + sa * s.h, ty = H - ca * s.h;
+      const cx = s.x + sa * s.h * .25, cy = H - s.h * .55;
+      ctx.globalAlpha = s.back ? .72 : 1;
+      ctx.strokeStyle = s.back ? '#a9bca5' : '#6f8c70'; ctx.lineWidth = s.back ? 1.2 : 1.9;
+      ctx.beginPath(); ctx.moveTo(s.x, H); ctx.quadraticCurveTo(cx, cy, tx, ty); ctx.stroke();
+      if (s.leaf) {
+        const lx = s.x + sa * s.h * .35, ly = H - ca * s.h * .4;
+        ctx.save(); ctx.translate(lx, ly); ctx.rotate(s.a + s.ls * 1.0 + Math.sin(t * 2 + s.ph) * .08);
+        ctx.fillStyle = s.back ? '#b9cbb5' : '#8fa98c'; ctx.beginPath(); ctx.ellipse(s.ls * 9, 0, 10, 3.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      }
+      const im = spr[s.f];
+      if (im) { const w = s.s, hh = w * im.height / im.width; ctx.save(); ctx.translate(tx, ty); ctx.rotate(s.a * 1.3); ctx.drawImage(im, -w / 2, -hh / 2, w, hh); ctx.restore(); }
+    }
+    ctx.globalAlpha = 1;
+  });
+}
+
 /* ---------------------------------------------------------
    START
 --------------------------------------------------------- */
@@ -833,6 +942,9 @@ function start(){
   initRitual();
   initPresetsSeason();
   initJournal();
+  initVineProgress();
+  initHeroLight();
+  initMeadow();
   ScrollTrigger.refresh();
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resizeDecos(); ScrollTrigger.refresh(); }, 200); });
   window.dispatchEvent(new Event('mf:ready'));
