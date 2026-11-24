@@ -76,17 +76,24 @@
       <span class="hero__line hero__line--2">Fl<span class="o-flower" aria-hidden="true"><img src="img/flowers/ranunculus_white.webp" alt=""></span>re</span>
     </h1>
     <p class="hero__sub" data-reveal>Haute couture flowers, grown slowly in our glasshouse<br>and delivered the morning they bloom.</p>
-    <div class="hero__cta" data-reveal>
-      <a href="#collection" class="btn btn--primary" data-perch><span>Order flowers</span></a>
-      <a href="#book" class="btn btn--ghost" data-perch><span>Book the garden</span></a>
-    </div>
+    <form class="hero__dock" id="dock" data-reveal>
+      <label class="dock__f"><span class="dock__k">Occasion</span>
+        <select id="dockOcc"><option value="all">Any moment</option><option value="love">Love</option><option value="birthday">Birthday</option><option value="thanks">Thank you</option><option value="luxe">A luxe gift</option></select></label>
+      <span class="dock__sep" aria-hidden="true"></span>
+      <label class="dock__f"><span class="dock__k">Deliver</span>
+        <select id="dockDay"><option value="0">Today</option><option value="1" selected>Tomorrow</option><option value="2">In two days</option></select></label>
+      <button class="btn btn--primary dock__go" data-perch><span>Find bouquets</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+    <a href="#book" class="hero__alt" data-reveal data-perch>or book a day in the garden <i>→</i></a>
   </div>
-  <div class="orbit" aria-hidden="true">
-    <span class="chip-g chip-g--1"><img src="img/flowers/rose_peach.webp" alt="">Cut at 6&nbsp;am</span>
-    <span class="chip-g chip-g--2"><img src="img/flowers/ranunculus_yellow.webp" alt="">Same-morning delivery</span>
-    <span class="chip-g chip-g--3"><img src="img/flowers/peony2.webp" alt="">Grown under glass</span>
-    <span class="chip-g chip-g--4"><img src="img/flowers/cherry.webp" alt="">31 varieties in bloom</span>
-  </div>
+  <aside class="hcard hcard--l glass" aria-label="Today's cut">
+    <img src="img/flowers/rose_blush.webp" alt="">
+    <div><p class="hcard__k"><i class="live"></i>Today's cut</p><p class="hcard__t">Juliet garden rose</p><p class="hcard__m">Cut at 06:12 · 214 stems</p></div>
+  </aside>
+  <aside class="hcard hcard--r glass" aria-label="Next delivery slot">
+    <div><p class="hcard__k">Next delivery slot</p><p class="hcard__t" id="slotName">11 am – 2 pm</p><p class="hcard__m">Order within <b id="slotCd">--:--:--</b></p></div>
+    <svg class="hcard__ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19"/><circle id="slotRing" cx="22" cy="22" r="19"/></svg>
+  </aside>
   <div class="hero__scroll" data-reveal><span>Scroll to bloom</span><i></i></div>
 </section>
 

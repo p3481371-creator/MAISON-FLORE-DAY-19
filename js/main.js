@@ -99,16 +99,9 @@ function initScroll(){
 // x,y = centre position as % of the heading box; w = width in em of the heading font-size
 const PRESETS = {
   hero: [
-    {f:'peony',            x:-4,  y:14, w:.95, r:-18, z:0},
-    {f:'cherry2',          x:12,  y:-14,w:.75, r:-8,  z:0},
-    {f:'cherry',           x:96,  y:-12,w:.55, r:28,  z:0},
-    {f:'peony2',           x:103, y:22, w:.62, r:14,  z:0},
-    {f:'rose_mauve2',      x:-7,  y:66, w:.6,  r:-26, z:1},
-    {f:'ranunculus_yellow',x:10,  y:88, w:.36, r:0,   z:1},
-    {f:'vine2',            x:-13, y:96, w:.5,  r:-62, z:0},
-    {f:'rose_blush',       x:95,  y:80, w:.72, r:12,  z:1},
-    {f:'rose_peach',       x:82,  y:100,w:.48, r:-10, z:1},
-    {f:'ranunculus_cream', x:106, y:62, w:.36, r:0,   z:1},
+    {f:'ranunculus_yellow',x:9,   y:90, w:.3,  r:0,   z:1},
+    {f:'rose_peach',       x:84,  y:96, w:.36, r:-10, z:1},
+    {f:'wild',             x:58,  y:-14,w:.34, r:-6,  z:0},
   ],
   sm: [
     [ {f:'peony',x:-3,y:30,w:.95,r:-14,z:0},{f:'rose_blush',x:2,y:84,w:.5,r:10,z:1},{f:'cherry',x:100,y:2,w:.62,r:32,z:0},{f:'ranunculus_yellow',x:101,y:70,w:.42,r:0,z:1},{f:'wild',x:96,y:96,w:.5,r:16,z:0} ],
@@ -226,7 +219,7 @@ function bloom(el){
   const oflower = $('.o-flower', el);
   if (oflower) tl.fromTo(oflower, {rotate: -220, scale: 0}, {rotate: 0, scale: 1, duration: 1.8, ease: 'elastic.out(1,.5)'}, .5);
   // hover: letters wave + a flower nods
-  el.addEventListener('mouseenter', () => {
+  if (!big) el.addEventListener('mouseenter', () => {
     gsap.to(chars, {y: -8, duration: .35, ease: 'power2.out', stagger: {each: .025, yoyo: true, repeat: 1}});
     gsap.to(decos, {scale: 1.08, duration: .5, ease: 'back.out(3)', yoyo: true, repeat: 1, stagger: .04});
   });
@@ -236,7 +229,7 @@ function bloom(el){
 function initBloomText(){
   $$('[data-bloom]').forEach(el => {
     const tl = bloom(el);
-    if (el.dataset.bloom === 'hero') { tl.play(0); return; }
+    if (el.dataset.bloom === 'hero') { gsap.delayedCall(1.2, () => tl.play(0)); return; }
     ScrollTrigger.create({trigger: el, start: 'top 82%', once: true, onEnter: () => tl.play(0)});
   });
   // hero parallax on pointer
@@ -724,14 +717,6 @@ function initAmbient(){
    V2 — HERO extras, film numerals
 --------------------------------------------------------- */
 function initHeroExtras(){
-  const chips = $$('.chip-g');
-  gsap.to(chips, {opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: .15, delay: 1.6, startAt: {y: 30}});
-  chips.forEach((c, i) => gsap.to(c, {y: i % 2 ? 14 : -14, x: i % 2 ? -8 : 8, duration: 3 + i * .6, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 2.8}));
-  if (!isTouch) addEventListener('pointermove', e => {
-    const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
-    chips.forEach((c, i) => gsap.to(c, {xPercent: nx * (20 + i * 10), yPercent: ny * (30 + i * 12), duration: 1.4, ease: 'power3.out', overwrite: 'auto'}));
-  });
-  gsap.to('.orbit', {yPercent: -40, opacity: 0, ease: 'none', scrollTrigger: {trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true}});
   // film numerals follow the chapters
   const nums = $$('#filmNum span'), wins = [[0, .33], [.33, .67], [.67, 1]];
   ScrollTrigger.create({trigger: '#film', start: 'top top', end: 'bottom bottom', onUpdate: st => {
@@ -923,6 +908,119 @@ function initMeadow(){
   });
 }
 
+
+/* ---------------------------------------------------------
+   V4 — LANDING: wreath, lens, dock, live cards
+--------------------------------------------------------- */
+const WREATH_F = ['peony','rose_blush','ranunculus_white','rose_mauve2','cherry2','rose_peach','peony2','vine','ranunculus_cream','rose_mauve','wild','ranunculus_yellow','cherry','vine2'];
+function initWreath(){
+  const hero = $('.hero'), inner = $('.hero__inner');
+  const back = document.createElement('div'), front = document.createElement('div');
+  back.className = 'wreath wreath--back'; front.className = 'wreath wreath--front';
+  back.setAttribute('aria-hidden', 'true'); front.setAttribute('aria-hidden', 'true');
+  hero.insertBefore(back, inner); hero.appendChild(front);
+  const small = innerWidth < 700, Wd = hero.clientWidth, Hd = hero.clientHeight;
+  const cx = Wd / 2, cy = Hd * .47;
+  const rx = Math.min(Wd * (small ? .6 : .45), 700), ry = Math.min(Hd * (small ? .4 : .42), 420);
+  const items = [];
+  const perSide = small ? 7 : 14;
+  (small ? [[-46, 46], [134, 226]] : [[-68, 68], [112, 248]]).forEach(([a0, a1], side) => {
+    for (let k = 0; k < perSide; k++) {
+      const t = k / (perSide - 1), ang = (a0 + (a1 - a0) * t) * Math.PI / 180;
+      const mid = 1 - Math.abs(t - .5) * 2;                  // 1 at the middle of the arc
+      const layer = k % 3 === 1 ? 'front' : 'back';
+      const rr = (layer === 'front' ? 1.07 : .97) + (Math.random() - .5) * .08;
+      const f = WREATH_F[(k * 5 + side * 3) % WREATH_F.length];
+      const leaf = f.startsWith('vine');
+      const size = (small ? .55 : 1) * (leaf ? 120 : 64 + mid * 110) * (layer === 'front' ? .82 : 1) * (.85 + Math.random() * .3);
+      items.push({x: cx + Math.cos(ang) * rx * rr, y: cy + Math.sin(ang) * ry * rr, size, f, layer, ang,
+        rot: leaf ? ang * 180 / Math.PI + 90 : (Math.random() - .5) * 50, d: layer === 'front' ? 1 : .45 + Math.random() * .3});
+    }
+  });
+  // a few blooms crowning the top and resting under the dock
+  if (!small) [[cx - rx * .55, cy - ry * 1.02, 'cherry2', 92], [cx + rx * .52, cy - ry * 1.0, 'cherry', 84], [cx - rx * .38, cy + ry * 1.02, 'ranunculus_white', 70], [cx + rx * .4, cy + ry * 1.04, 'rose_blush', 80]]
+    .forEach(([x, y, f, size]) => items.push({x, y, size, f, layer: 'back', ang: Math.atan2(y - cy, x - cx), rot: (Math.random() - .5) * 40, d: .5}));
+  const els = items.map(it => {
+    const wf = document.createElement('div'); wf.className = 'wf';
+    wf.style.width = it.size + 'px';
+    gsap.set(wf, {x: it.x - it.size / 2, y: it.y - it.size / 2});
+    wf.innerHTML = `<span class="wf__p" style="rotate:${it.rot}deg"><img src="${F(it.f)}" alt="" decoding="async"></span>`;
+    (it.layer === 'front' ? front : back).appendChild(wf);
+    return {...it, wf, p: $('.wf__p', wf), img: $('img', wf)};
+  });
+  // intro: blooms fly in from beyond the screen and settle into the wreath
+  els.forEach((e, i) => {
+    const dx = Math.cos(e.ang), dy = Math.sin(e.ang);
+    gsap.fromTo(e.img, {x: dx * Wd * .55, y: dy * Hd * .55, scale: 0, rotate: (i % 2 ? 1 : -1) * 200, opacity: 0},
+      {x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, duration: 2.1, ease: 'expo.out', delay: 1.15 + Math.abs(Math.sin(e.ang)) * .5 + (i % 5) * .05,
+       onComplete: () => gsap.to(e.img, {rotate: (i % 2 ? 1 : -1) * (4 + Math.random() * 5), y: (i % 3 - 1) * 5, duration: 2.6 + Math.random() * 2, yoyo: true, repeat: -1, ease: 'sine.inOut'})});
+  });
+  // depth parallax with the pointer
+  if (!isTouch) {
+    const movers = els.map(e => ({e, x: gsap.quickTo(e.p, 'x', {duration: 1.4, ease: 'power3.out'}), y: gsap.quickTo(e.p, 'y', {duration: 1.4, ease: 'power3.out'})}));
+    addEventListener('pointermove', ev => {
+      if (scrollY > innerHeight) return;
+      const nx = ev.clientX / innerWidth - .5, ny = ev.clientY / innerHeight - .5;
+      movers.forEach(m => { m.x(-nx * 70 * m.e.d); m.y(-ny * 50 * m.e.d); });
+    }, {passive: true});
+  }
+  // scroll: the wreath bursts open and we fly through it into the film
+  const st = {trigger: hero, start: 'top top', end: 'bottom top', scrub: .6};
+  els.forEach(e => {
+    gsap.to(e.wf, {x: `+=${Math.cos(e.ang) * Wd * (.35 + e.d * .45)}`, y: `+=${Math.sin(e.ang) * Hd * (.3 + e.d * .4) - 80}`, scale: 1.25 + e.d * .6, rotate: (e.x < cx ? -1 : 1) * (40 + e.d * 80), ease: 'none', scrollTrigger: st});
+  });
+  gsap.to(els.map(e => e.wf), {opacity: 0, ease: 'power2.in', scrollTrigger: {trigger: hero, start: 'top top', end: '65% top', scrub: .6}});
+  gsap.to('.hero__title', {scale: 1.12, filter: 'blur(3px)', ease: 'none', scrollTrigger: st});
+}
+
+function initLens(){
+  if (isTouch) return;
+  const line = $('.hero__line'); if (!line) return;
+  gsap.delayedCall(3.6, () => {
+    const lens = document.createElement('span'); lens.className = 'hero__lens'; lens.setAttribute('aria-hidden', 'true');
+    lens.innerHTML = $$('.bl-word', line).map(w => w.outerHTML).join(' ');
+    $$('[style]', lens).forEach(n => n.removeAttribute('style'));
+    line.appendChild(lens);
+    const r = {v: 0}, setR = () => lens.style.setProperty('--lr', r.v + 'px');
+    const title = $('.hero__title');
+    title.addEventListener('pointermove', e => { const b = lens.getBoundingClientRect(); lens.style.setProperty('--lx', (e.clientX - b.left) + 'px'); lens.style.setProperty('--ly', (e.clientY - b.top) + 'px'); });
+    title.addEventListener('pointerenter', () => gsap.to(r, {v: 170, duration: .8, ease: 'expo.out', onUpdate: setR}));
+    title.addEventListener('pointerleave', () => gsap.to(r, {v: 0, duration: .6, ease: 'power3.in', onUpdate: setR}));
+  });
+}
+
+function initDock(){
+  const form = $('#dock'); if (!form) return;
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const occ = $('#dockOcc').value, day = +$('#dockDay').value;
+    const chip = $(`.chip[data-filter="${occ}"]`); if (chip) chip.click();
+    const d = new Date(); d.setDate(d.getDate() + Math.max(1, day)); const dd = $('#delDate'); if (dd) dd.value = d.toISOString().slice(0, 10);
+    const r = $('.dock__go').getBoundingClientRect(); petalBurst(r.left + r.width / 2, r.top + r.height / 2, 18);
+    setTimeout(() => { lenis ? lenis.scrollTo('#collection', {duration: 1.8}) : $('#collection').scrollIntoView({behavior: 'smooth'}); }, 250);
+  });
+  gsap.fromTo('.hero__dock', {scale: .9}, {scale: 1, duration: 1.4, ease: 'elastic.out(1,.6)', delay: 2.1});
+}
+
+function initLiveCards(){
+  const cards = $$('.hcard'); if (!cards.length) return;
+  gsap.fromTo(cards, {y: 40, opacity: 0}, {y: 0, opacity: 1, duration: 1.3, ease: 'expo.out', stagger: .15, delay: 2.6});
+  gsap.to(cards, {y: -60, opacity: 0, ease: 'none', scrollTrigger: {trigger: '.hero', start: '10% top', end: '45% top', scrub: true}});
+  const SLOTS = [[6, '8 – 11 am'], [9, '11 am – 2 pm'], [12, '2 – 5 pm'], [15, '5 – 8 pm']];
+  const ring = $('#slotRing'), C = 2 * Math.PI * 19;
+  const tick = () => {
+    const now = new Date(); let cut = null, name = '', prev = null;
+    for (const [h, n] of SLOTS) { const c = new Date(now); c.setHours(h, 0, 0, 0); if (c > now) { cut = c; name = n; break; } prev = c; }
+    if (!cut) { cut = new Date(now); cut.setDate(cut.getDate() + 1); cut.setHours(6, 0, 0, 0); name = '8 – 11 am, tomorrow'; prev = new Date(now); prev.setHours(15, 0, 0, 0); }
+    if (!prev) { prev = new Date(cut); prev.setHours(cut.getHours() - 3); }
+    const left = Math.max(0, cut - now), span = cut - prev;
+    const hh = String(Math.floor(left / 3.6e6)).padStart(2, '0'), mm = String(Math.floor(left / 6e4) % 60).padStart(2, '0'), ss = String(Math.floor(left / 1e3) % 60).padStart(2, '0');
+    $('#slotCd').textContent = `${hh}:${mm}:${ss}`; $('#slotName').textContent = name;
+    ring.style.strokeDashoffset = C * (left / span);
+  };
+  tick(); setInterval(tick, 1000);
+}
+
 /* ---------------------------------------------------------
    START
 --------------------------------------------------------- */
@@ -945,6 +1043,10 @@ function start(){
   initVineProgress();
   initHeroLight();
   initMeadow();
+  initWreath();
+  initLens();
+  initDock();
+  initLiveCards();
   ScrollTrigger.refresh();
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resizeDecos(); ScrollTrigger.refresh(); }, 200); });
   window.dispatchEvent(new Event('mf:ready'));

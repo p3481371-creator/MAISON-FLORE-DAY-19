@@ -153,7 +153,7 @@ body::after{ /* paper grain */
 .hero__line--2{font-style:italic;font-weight:300;color:var(--rose);text-transform:none;letter-spacing:-.01em;margin-top:-.02em;padding-left:.6em}
 .o-flower{display:inline-block;width:.74em;height:.74em;vertical-align:-.04em;margin:0 .02em;position:relative}
 .o-flower img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(120,80,60,.18))}
-.hero__sub{font-family:var(--serif);font-size:clamp(1.2rem,1.8vw,1.55rem);line-height:1.45;color:var(--ink-2);margin:2.4rem auto 2.4rem;font-style:italic}
+.hero__sub{font-family:var(--serif);font-size:clamp(1.2rem,1.8vw,1.55rem);line-height:1.45;color:var(--ink-2);margin:2rem auto 1.8rem;font-style:italic}
 .hero__cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 .hero__scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.7rem;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-2);z-index:2}
 .hero__scroll i{width:1px;height:44px;background:linear-gradient(var(--ink-2),transparent);animation:drip 2.2s var(--ease) infinite}
@@ -593,3 +593,63 @@ body::after{ /* paper grain */
 .meadow canvas{position:absolute;inset:0;width:100%;height:100%;-webkit-mask-image:linear-gradient(transparent,#000 22%);mask-image:linear-gradient(transparent,#000 22%)}
 .meadow__hint{position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:2;font-size:.68rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap}
 @media (max-width:640px){.meadow{height:240px}.meadow__hint{font-size:.58rem;letter-spacing:.16em}}
+
+/* =========================================================
+   v4 — landing
+   ========================================================= */
+.hero__inner{z-index:4}
+.wreath{position:absolute;inset:0;pointer-events:none}
+.wreath--back{z-index:1}.wreath--front{z-index:5}
+.wf{position:absolute;left:0;top:0;will-change:transform}
+.wf__p{display:block;will-change:transform}
+.wf img{display:block;width:100%;filter:drop-shadow(0 16px 22px rgba(120,70,60,.18));will-change:transform}
+.wreath--back .wf img{filter:drop-shadow(0 10px 14px rgba(120,70,60,.12)) saturate(.92)}
+
+/* lens: the garden inside the letters */
+.hero__line{position:relative}
+.hero__lens{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;white-space:nowrap;
+  -webkit-mask-image:radial-gradient(circle var(--lr,0px) at var(--lx,50%) var(--ly,50%),#000 58%,transparent 100%);
+  mask-image:radial-gradient(circle var(--lr,0px) at var(--lx,50%) var(--ly,50%),#000 58%,transparent 100%)}
+.hero__lens .bl-char{color:transparent!important;background:url(../img/garden/conservatory-2.webp) center/cover fixed;-webkit-background-clip:text;background-clip:text;transform:none!important;filter:none!important;opacity:1!important}
+
+/* order dock */
+.hero__dock{display:inline-flex;align-items:center;gap:.4rem;padding:8px 8px 8px 26px;border-radius:999px;
+  background:linear-gradient(135deg,rgba(255,255,255,.85),rgba(255,255,255,.5));backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid #fff;box-shadow:0 30px 70px -30px rgba(120,70,80,.45),inset 0 1px 0 #fff}
+.dock__f{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:0 .9rem 0 0}
+.dock__k{font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.dock__f select{appearance:none;-webkit-appearance:none;border:0;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%233B2A31' stroke-width='1.3'/%3E%3C/svg%3E") right 2px center no-repeat;
+  font-family:var(--serif);font-size:1.3rem;color:var(--ink);padding:0 22px 0 0;cursor:pointer;outline:none;min-width:130px}
+.dock__f select:focus-visible{outline:2px solid var(--rose);outline-offset:4px;border-radius:6px}
+.dock__sep{width:1px;height:34px;background:var(--line);margin-right:1rem}
+.dock__go{height:58px;padding:0 1.6rem 0 1.9rem;margin-left:.4rem}
+.dock__go svg{position:relative;z-index:2;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .5s var(--ease)}
+.dock__go:hover svg{transform:translateX(4px)}
+.hero__alt{display:inline-block;margin-top:1.2rem;font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--ink-2);border-bottom:1px solid transparent;transition:color .3s,border-color .3s}
+.hero__alt i{font-style:normal;display:inline-block;transition:transform .5s var(--ease)}
+.hero__alt:hover{color:var(--rose);border-color:var(--rose)}
+.hero__alt:hover i{transform:translateX(6px)}
+.hero__inner > .hero__alt{display:table;margin-left:auto;margin-right:auto}
+
+/* live side cards */
+.hcard{position:absolute;bottom:42px;z-index:6;display:flex;align-items:center;gap:.9rem;padding:.8rem 1.2rem .8rem .8rem;border-radius:22px;opacity:0}
+.hcard--l{left:3.5vw}.hcard--r{right:3.5vw;padding:.8rem .8rem .8rem 1.3rem}
+.hcard img{width:54px;height:54px;object-fit:contain}
+.hcard__k{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:.45rem}
+.hcard__t{font-family:var(--serif);font-size:1.25rem;line-height:1.15}
+.hcard__m{font-size:.76rem;color:var(--ink-2)}
+.hcard__m b{font-variant-numeric:tabular-nums;color:var(--rose-deep);font-weight:600}
+.live{width:7px;height:7px;border-radius:50%;background:#6fae7a;box-shadow:0 0 0 0 rgba(111,174,122,.6);animation:live 2s infinite}
+@keyframes live{70%{box-shadow:0 0 0 8px rgba(111,174,122,0)}100%{box-shadow:0 0 0 0 rgba(111,174,122,0)}}
+.hcard__ring{width:44px;height:44px;transform:rotate(-90deg)}
+.hcard__ring circle{fill:none;stroke-width:2.5}
+.hcard__ring circle:first-child{stroke:rgba(59,42,49,.08)}
+.hcard__ring circle:last-child{stroke:var(--rose);stroke-linecap:round;stroke-dasharray:119.4;stroke-dashoffset:119.4;transition:stroke-dashoffset 1s linear}
+@media (max-width:1100px){.hcard{display:none}}
+@media (max-width:640px){
+  .hero__dock{flex-wrap:wrap;justify-content:center;border-radius:28px;padding:14px;gap:.6rem}
+  .dock__sep{display:none}
+  .dock__f{padding:0 .4rem}
+  .dock__f select{min-width:0;font-size:1.15rem}
+  .dock__go{width:100%;margin:0}
+}
