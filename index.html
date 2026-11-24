@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAISON FLORE — Haute Couture Flowers &amp; Glasshouse Garden</title>
+<meta name="description" content="MAISON FLORE — order couture bouquets grown in our glasshouse, or book a garden visit, a flower workshop or a private dinner among the roses. Concept website.">
+<meta name="theme-color" content="#FBF7F2">
+<link rel="icon" href="img/flowers/rose_blush.webp" type="image/webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/flowers/peony.webp">
+<link rel="preload" as="image" href="img/flowers/rose_blush.webp">
+<link rel="preload" as="image" href="img/flowers/ranunculus_white.webp">
+<link rel="preload" as="image" href="frames/bloom/f_001.webp">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="is-loading">
+
+<!-- ============ LOADER ============ -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader__bloom">
+    <img src="img/flowers/rose_blush.webp" alt="" class="loader__rose">
+    <svg class="loader__ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56"/></svg>
+  </div>
+  <p class="loader__word">Maison <em>Flore</em></p>
+  <p class="loader__pct"><span id="loaderPct">0</span>%</p>
+</div>
+
+<!-- creatures layer (bee + butterfly) -->
+<canvas id="creatures" aria-hidden="true"></canvas>
+<div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <a href="#top" class="nav__logo" data-perch>
+    <span class="nav__mono">MF</span>
+    <span class="nav__name">Maison <em>Flore</em></span>
+  </a>
+  <nav class="nav__links" aria-label="Main">
+    <a href="#collection" data-perch>Collection</a>
+    <a href="#atelier" data-perch>Build a Bouquet</a>
+    <a href="#garden" data-perch>The Garden</a>
+    <a href="#book" data-perch>Book</a>
+  </nav>
+  <div class="nav__actions">
+    <a href="#book" class="btn btn--ghost btn--sm nav__book" data-perch>Book a visit</a>
+    <button class="nav__bag" id="bagBtn" aria-label="Open your bag" data-perch>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="nav__count" id="bagCount">0</span>
+    </button>
+    <button class="nav__burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#collection">Collection</a><a href="#atelier">Build a Bouquet</a><a href="#garden">The Garden</a><a href="#book">Book</a>
+</div>
+
+<main id="top">
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+  <div class="hero__glow"></div>
+  <div class="hero__inner">
+    <p class="eyebrow hero__eyebrow" data-reveal>Glasshouse grown · Hand-tied daily</p>
+    <h1 class="hero__title" data-bloom="hero" data-perch aria-label="Maison Flore">
+      <span class="hero__line">Maison</span>
+      <span class="hero__line hero__line--2">Fl<span class="o-flower" aria-hidden="true"><img src="img/flowers/ranunculus_white.webp" alt=""></span>re</span>
+    </h1>
+    <p class="hero__sub" data-reveal>Haute couture flowers, grown slowly in our glasshouse<br>and delivered the morning they bloom.</p>
+    <div class="hero__cta" data-reveal>
+      <a href="#collection" class="btn btn--primary" data-perch><span>Order flowers</span></a>
+      <a href="#book" class="btn btn--ghost" data-perch><span>Book the garden</span></a>
+    </div>
+  </div>
+  <div class="hero__scroll" data-reveal><span>Scroll to bloom</span><i></i></div>
+</section>
+
+<!-- ============ BLOOM FILM ============ -->
+<section class="film" id="film">
+  <div class="film__sticky">
+    <canvas class="film__canvas" id="filmCanvas"></canvas>
+    <div class="film__fade"></div>
+    <div class="film__copy">
+      <div class="film__step" data-step="0">
+        <p class="eyebrow">Chapter I</p>
+        <h2 class="film__h">It begins<br><em>as a promise</em></h2>
+        <p>Every stem is cut at dawn, still closed, still keeping its secret.</p>
+      </div>
+      <div class="film__step" data-step="1">
+        <p class="eyebrow">Chapter II</p>
+        <h2 class="film__h">Then, slowly,<br><em>it opens</em></h2>
+        <p>Thirty-one layers of petal, unfolding in the warmth of the glasshouse.</p>
+      </div>
+      <div class="film__step" data-step="2">
+        <p class="eyebrow">Chapter III</p>
+        <h2 class="film__h">And arrives<br><em>in full bloom</em></h2>
+        <p>Hand-tied, wrapped in silk and at your door before it fades.</p>
+      </div>
+    </div>
+    <div class="film__progress"><i id="filmBar"></i></div>
+  </div>
+</section>
+
+<!-- ============ COLLECTION ============ -->
+<section class="collection section" id="collection">
+  <header class="section__head">
+    <p class="eyebrow" data-reveal>The Collection</p>
+    <h2 class="display" data-bloom="sm" data-perch>Bouquets <em>for every</em> feeling</h2>
+    <p class="section__lede" data-reveal>Nine signature arrangements, composed each morning from what is blooming in the glasshouse.</p>
+  </header>
+  <div class="chips" id="chips" role="tablist" aria-label="Filter by occasion">
+    <button class="chip is-active" data-filter="all" role="tab" aria-selected="true">All</button>
+    <button class="chip" data-filter="love" role="tab" aria-selected="false">Love</button>
+    <button class="chip" data-filter="birthday" role="tab" aria-selected="false">Birthday</button>
+    <button class="chip" data-filter="thanks" role="tab" aria-selected="false">Thank you</button>
+    <button class="chip" data-filter="luxe" role="tab" aria-selected="false">Luxe boxes</button>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</section>
+
+<!-- ============ ATELIER (BUILD A BOUQUET) ============ -->
+<section class="atelier section" id="atelier">
+  <header class="section__head">
+    <p class="eyebrow" data-reveal>The Atelier</p>
+    <h2 class="display" data-bloom="sm" data-perch>Compose <em>your own</em></h2>
+    <p class="section__lede" data-reveal>Choose your stems and watch your bouquet come together. We hand-tie it exactly as you see it.</p>
+  </header>
+  <div class="atelier__wrap">
+    <div class="atelier__stage glass" id="stage">
+      <div class="stage__bouquet" id="bouquet"></div>
+      <div class="stage__wrap" id="wrapPaper"></div>
+      <p class="stage__empty" id="stageEmpty">Add a stem to begin</p>
+    </div>
+    <div class="atelier__panel">
+      <ol class="stems" id="stems"></ol>
+      <div class="wraps">
+        <p class="label">Wrap</p>
+        <div class="wraps__row" id="wraps">
+          <button class="swatch is-active" data-wrap="ivory" style="--c:#F6EFE4" aria-label="Ivory silk"></button>
+          <button class="swatch" data-wrap="blush" style="--c:#F1CFCB" aria-label="Blush tissue"></button>
+          <button class="swatch" data-wrap="sage" style="--c:#C9D5C3" aria-label="Sage linen"></button>
+          <button class="swatch" data-wrap="butter" style="--c:#F3E3B5" aria-label="Butter kraft"></button>
+        </div>
+      </div>
+      <div class="atelier__total">
+        <div><p class="label">Your bouquet</p><p class="atelier__price" id="atelierPrice">₹0</p><p class="atelier__meta" id="atelierMeta">0 stems</p></div>
+        <button class="btn btn--primary" id="atelierAdd" disabled data-perch><span>Add to bag</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GARDEN ============ -->
+<section class="garden section" id="garden">
+  <header class="section__head">
+    <p class="eyebrow" data-reveal>The Garden</p>
+    <h2 class="display" data-bloom="sm" data-perch>A glasshouse <em>of slow</em> beauty</h2>
+    <p class="section__lede" data-reveal>Two acres of roses, peonies and climbing jasmine under Victorian glass. Open for visits, workshops and evenings among the flowers.</p>
+  </header>
+  <div class="garden__rail" id="gardenRail">
+    <figure class="gcard gcard--tall"><img src="img/garden/conservatory.webp" alt="White glass conservatory full of blooming roses" loading="lazy"><figcaption><span>01</span>The Conservatory</figcaption></figure>
+    <figure class="gcard"><img src="img/garden/rose-arch.webp" alt="Path under arches of climbing roses towards the glasshouse" loading="lazy"><figcaption><span>02</span>The Rose Walk</figcaption></figure>
+    <figure class="gcard gcard--tall"><img src="img/garden/workshop.webp" alt="Flower arranging table in the glasshouse" loading="lazy"><figcaption><span>03</span>The Atelier Table</figcaption></figure>
+    <figure class="gcard"><img src="img/garden/dinner.webp" alt="Long dinner table with white linen on the garden lawn" loading="lazy"><figcaption><span>04</span>Supper on the Lawn</figcaption></figure>
+    <figure class="gcard gcard--tall"><img src="img/garden/rose-path.webp" alt="Lavender-lined garden path" loading="lazy"><figcaption><span>05</span>The Lavender Path</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ BOOK ============ -->
+<section class="book section" id="book">
+  <header class="section__head">
+    <p class="eyebrow" data-reveal>Reservations</p>
+    <h2 class="display" data-bloom="sm" data-perch>Spend a day <em>in bloom</em></h2>
+    <p class="section__lede" data-reveal>Choose an experience, pick a date and we'll have the garden ready for you.</p>
+  </header>
+  <div class="book__wrap">
+    <div class="book__left">
+      <p class="label">1 · Experience</p>
+      <div class="exps" id="exps"></div>
+      <p class="label">2 · Date</p>
+      <div class="cal glass" id="cal">
+        <div class="cal__head"><button class="cal__nav" id="calPrev" aria-label="Previous month">‹</button><p id="calTitle"></p><button class="cal__nav" id="calNext" aria-label="Next month">›</button></div>
+        <div class="cal__dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+        <div class="cal__grid" id="calGrid"></div>
+      </div>
+    </div>
+    <div class="book__right">
+      <p class="label">3 · Time &amp; guests</p>
+      <div class="slots" id="slots"></div>
+      <div class="guests glass">
+        <div><p class="guests__t">Guests</p><p class="guests__s" id="guestHint">Up to 8 per booking</p></div>
+        <div class="stepper"><button id="gMinus" aria-label="Fewer guests">−</button><output id="gCount">2</output><button id="gPlus" aria-label="More guests">+</button></div>
+      </div>
+      <div class="summary glass" id="summary">
+        <img class="summary__flower" src="img/flowers/peony2.webp" alt="">
+        <p class="label">Your reservation</p>
+        <h3 class="summary__exp" id="sumExp">Choose an experience</h3>
+        <dl class="summary__rows">
+          <div><dt>Date</dt><dd id="sumDate">—</dd></div>
+          <div><dt>Time</dt><dd id="sumTime">—</dd></div>
+          <div><dt>Guests</dt><dd id="sumGuests">2</dd></div>
+          <div class="summary__total"><dt>Total</dt><dd id="sumTotal">₹0</dd></div>
+        </dl>
+        <button class="btn btn--primary btn--block" id="bookBtn" disabled data-perch><span>Reserve</span></button>
+        <p class="fine">Free cancellation up to 48 hours before your visit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROMISE STRIP ============ -->
+<section class="promise">
+  <div class="marquee"><div class="marquee__track" id="marquee">
+    <span>Cut at dawn</span><img src="img/flowers/rose_peach.webp" alt=""><span>Hand-tied in the glasshouse</span><img src="img/flowers/ranunculus_yellow.webp" alt=""><span>Same-morning delivery</span><img src="img/flowers/peony.webp" alt=""><span>Wrapped in silk</span><img src="img/flowers/rose_mauve.webp" alt="">
+  </div></div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer" id="footer">
+  <div class="footer__top">
+    <h2 class="footer__word" data-bloom="footer" data-perch>Maison <em>Flore</em></h2>
+    <form class="footer__news" id="newsForm">
+      <p class="label">Letters from the garden</p>
+      <div class="footer__field"><input type="email" placeholder="Your email" aria-label="Email" required><button class="btn btn--primary btn--sm" data-perch><span>Join</span></button></div>
+      <p class="fine" id="newsMsg">Seasonal notes, first blooms and private garden evenings.</p>
+    </form>
+  </div>
+  <div class="footer__cols">
+    <div><p class="label">Shop</p><a href="#collection">Collection</a><a href="#atelier">Build a bouquet</a><a href="#collection">Luxe boxes</a></div>
+    <div><p class="label">Garden</p><a href="#garden">The glasshouse</a><a href="#book">Garden visits</a><a href="#book">Workshops</a></div>
+    <div><p class="label">Visit</p><p>The Glasshouse, Maison Flore</p><p>Open daily · 8am – 7pm</p></div>
+    <div><p class="label">Follow</p><a href="#" aria-label="Instagram">Instagram</a><a href="#">Pinterest</a></div>
+  </div>
+  <p class="footer__note">Concept website · sample products and prices · not a real store</p>
+</footer>
+
+<!-- ============ BAG DRAWER ============ -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer glass" id="drawer" aria-label="Your bag" aria-hidden="true">
+  <header class="drawer__head"><h3>Your bag</h3><button class="drawer__close" id="drawerClose" aria-label="Close bag">×</button></header>
+  <div class="drawer__body" id="drawerBody"></div>
+  <div class="drawer__delivery" id="drawerDelivery">
+    <p class="label">Delivery</p>
+    <div class="drawer__row">
+      <label>Date<input type="date" id="delDate"></label>
+      <label>Slot<select id="delSlot"><option>8 – 11 am</option><option>11 am – 2 pm</option><option>2 – 5 pm</option><option>5 – 8 pm</option></select></label>
+    </div>
+    <label class="drawer__msg">Handwritten card<textarea id="delNote" rows="2" maxlength="140" placeholder="A few words, written in ink…"></textarea></label>
+  </div>
+  <footer class="drawer__foot">
+    <div class="drawer__sum"><span>Subtotal</span><strong id="drawerTotal">₹0</strong></div>
+    <button class="btn btn--primary btn--block" id="checkoutBtn" data-perch><span>Checkout</span></button>
+    <p class="fine">Demo checkout · no payment is taken</p>
+  </footer>
+</aside>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal__card glass">
+    <div class="modal__bloom"><img src="img/flowers/peony.webp" alt=""></div>
+    <p class="eyebrow" id="modalEyebrow">Thank you</p>
+    <h3 class="modal__h" id="modalTitle">It's blooming</h3>
+    <p class="modal__p" id="modalText"></p>
+    <button class="btn btn--primary" id="modalClose" data-perch><span>Back to the garden</span></button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script src="js/main.js"></script>
+<script type="module" src="js/creatures.js"></script>
+</body>
+</html>
