@@ -30,6 +30,7 @@
 
 <!-- creatures layer (bee + butterfly) -->
 <canvas id="creatures" aria-hidden="true"></canvas>
+<div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__ring"></span><span class="cursor__label" id="cursorLabel"></span></div>
 <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
 
 <!-- ============ NAV ============ -->
@@ -41,6 +42,7 @@
   <nav class="nav__links" aria-label="Main">
     <a href="#collection" data-perch>Collection</a>
     <a href="#atelier" data-perch>Build a Bouquet</a>
+    <a href="#season" data-perch>In Bloom</a>
     <a href="#garden" data-perch>The Garden</a>
     <a href="#book" data-perch>Book</a>
   </nav>
@@ -55,7 +57,7 @@
 </header>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#collection">Collection</a><a href="#atelier">Build a Bouquet</a><a href="#garden">The Garden</a><a href="#book">Book</a>
+  <a href="#collection">Collection</a><a href="#atelier">Build a Bouquet</a><a href="#season">In Bloom</a><a href="#garden">The Garden</a><a href="#book">Book</a>
 </div>
 
 <main id="top">
@@ -75,6 +77,12 @@
       <a href="#book" class="btn btn--ghost" data-perch><span>Book the garden</span></a>
     </div>
   </div>
+  <div class="orbit" aria-hidden="true">
+    <span class="chip-g chip-g--1"><img src="img/flowers/rose_peach.webp" alt="">Cut at 6&nbsp;am</span>
+    <span class="chip-g chip-g--2"><img src="img/flowers/ranunculus_yellow.webp" alt="">Same-morning delivery</span>
+    <span class="chip-g chip-g--3"><img src="img/flowers/peony2.webp" alt="">Grown under glass</span>
+    <span class="chip-g chip-g--4"><img src="img/flowers/cherry.webp" alt="">31 varieties in bloom</span>
+  </div>
   <div class="hero__scroll" data-reveal><span>Scroll to bloom</span><i></i></div>
 </section>
 
@@ -83,6 +91,7 @@
   <div class="film__sticky">
     <canvas class="film__canvas" id="filmCanvas"></canvas>
     <div class="film__fade"></div>
+    <div class="film__num" id="filmNum" aria-hidden="true"><span>I</span><span>II</span><span>III</span></div>
     <div class="film__copy">
       <div class="film__step" data-step="0">
         <p class="eyebrow">Chapter I</p>
@@ -101,6 +110,41 @@
       </div>
     </div>
     <div class="film__progress"><i id="filmBar"></i></div>
+  </div>
+</section>
+
+
+<!-- ============ RITUAL ============ -->
+<section class="ritual section" id="ritual">
+  <header class="section__head">
+    <p class="eyebrow" data-reveal>The Ritual</p>
+    <h2 class="display" data-bloom="sm" data-perch>From glasshouse <em>to your door</em></h2>
+    <p class="section__lede" data-reveal>Four hours, four hands, one stem at a time. This is how every Maison Flore bouquet is made.</p>
+  </header>
+  <div class="ritual__track">
+    <svg class="ritual__vine" viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden="true"><path id="ritualPath" d="M0,150 C150,40 250,200 400,110 S650,20 800,120 S1050,210 1200,70"/></svg>
+    <article class="rstep glass" data-perch>
+      <span class="rstep__n">01</span><img class="rstep__f" src="img/flowers/cherry2.webp" alt="">
+      <p class="rstep__time">4:30 am</p><h3>Grown under glass</h3><p>Two acres of Victorian glasshouse, warmed by the sun and watered by hand.</p>
+    </article>
+    <article class="rstep glass" data-perch>
+      <span class="rstep__n">02</span><img class="rstep__f" src="img/flowers/rose_blush.webp" alt="">
+      <p class="rstep__time">6:00 am</p><h3>Cut at dawn</h3><p>Stems are cut while still cool, the moment they're ready to open.</p>
+    </article>
+    <article class="rstep glass" data-perch>
+      <span class="rstep__n">03</span><img class="rstep__f" src="img/flowers/peony.webp" alt="">
+      <p class="rstep__time">7:30 am</p><h3>Hand-tied</h3><p>Our florists compose each bouquet spiral by spiral, then wrap it in silk.</p>
+    </article>
+    <article class="rstep glass" data-perch>
+      <span class="rstep__n">04</span><img class="rstep__f" src="img/flowers/ranunculus_yellow.webp" alt="">
+      <p class="rstep__time">10:00 am</p><h3>At your door</h3><p>Delivered in a cooled case, in bloom, with your words written in ink.</p>
+    </article>
+  </div>
+  <div class="stats">
+    <div class="stat"><p class="stat__v"><span data-count="4">0</span><small>hrs</small></p><p class="stat__l">from stem to door</p></div>
+    <div class="stat"><p class="stat__v"><span data-count="31">0</span></p><p class="stat__l">varieties in bloom</p></div>
+    <div class="stat"><p class="stat__v"><span data-count="2">0</span><small>acres</small></p><p class="stat__l">under Victorian glass</p></div>
+    <div class="stat"><p class="stat__v"><span data-count="0">0</span><small>plastic</small></p><p class="stat__l">silk, paper &amp; ribbon only</p></div>
   </div>
 </section>
 
@@ -132,9 +176,21 @@
     <div class="atelier__stage glass" id="stage">
       <div class="stage__bouquet" id="bouquet"></div>
       <div class="stage__wrap" id="wrapPaper"></div>
-      <p class="stage__empty" id="stageEmpty">Add a stem to begin</p>
+      <div class="stage__empty" id="stageEmpty">
+        <svg class="ghost" viewBox="0 0 200 260" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+          <circle cx="100" cy="70" r="30"/><circle cx="62" cy="92" r="22"/><circle cx="140" cy="94" r="24"/><circle cx="84" cy="118" r="18"/><circle cx="122" cy="124" r="18"/>
+          <path d="M100 100 C100 150 98 190 96 240M84 130 C90 170 92 200 94 240M120 136 C112 175 104 205 100 240"/><path d="M55 150 L145 150 L118 245 L82 245 Z"/></g></svg>
+        <p>Add a stem, or start from a preset</p>
+      </div>
+      <div class="stage__count" id="stageCount"><b>0</b> stems</div>
     </div>
     <div class="atelier__panel">
+      <div class="presets"><p class="label">Start from a preset</p><div class="presets__row" id="presets">
+        <button class="preset" data-p='{"rose_blush":4,"ranunculus_white":3,"wild":2}' data-perch><img src="img/flowers/rose_blush.webp" alt="">Blush Classic</button>
+        <button class="preset" data-p='{"peony":3,"rose_peach":2,"vine":2}' data-perch><img src="img/flowers/peony.webp" alt="">Peony Cloud</button>
+        <button class="preset" data-p='{"ranunculus_yellow":4,"ranunculus_white":2,"wild":3}' data-perch><img src="img/flowers/ranunculus_yellow.webp" alt="">Morning Gold</button>
+        <button class="preset" data-p='{"rose_mauve":4,"rose_blush":2,"vine":2,"wild":1}' data-perch><img src="img/flowers/rose_mauve.webp" alt="">Velvet Dusk</button>
+      </div></div>
       <ol class="stems" id="stems"></ol>
       <div class="wraps">
         <p class="label">Wrap</p>
@@ -151,6 +207,24 @@
       </div>
     </div>
   </div>
+</section>
+
+
+<!-- ============ IN SEASON ============ -->
+<section class="season section" id="season">
+  <header class="section__head">
+    <p class="eyebrow" data-reveal>In Bloom Now</p>
+    <h2 class="display" data-bloom="sm" data-perch>This season's <em>stems</em></h2>
+    <p class="section__lede" data-reveal>Hover a flower to meet it. Tap one to add it straight to your composition.</p>
+  </header>
+  <ul class="season__list" id="seasonList">
+    <li class="srow" data-flower="rose_blush" data-stem="rose_blush"><span class="srow__i">01</span><span class="srow__n">Garden Rose</span><span class="srow__l"><em>Rosa</em> 'Juliet'</span><span class="srow__m">Oct — May</span><span class="srow__p">₹240<small>/stem</small></span><span class="srow__thumb"><img src="img/flowers/rose_blush.webp" alt=""></span></li>
+    <li class="srow" data-flower="peony" data-stem="peony"><span class="srow__i">02</span><span class="srow__n">Peony</span><span class="srow__l"><em>Paeonia</em> 'Sarah Bernhardt'</span><span class="srow__m">Nov — Mar</span><span class="srow__p">₹420<small>/stem</small></span><span class="srow__thumb"><img src="img/flowers/peony.webp" alt=""></span></li>
+    <li class="srow" data-flower="ranunculus_yellow" data-stem="ranunculus_yellow"><span class="srow__i">03</span><span class="srow__n">Ranunculus</span><span class="srow__l"><em>Ranunculus</em> 'Butter'</span><span class="srow__m">Dec — Apr</span><span class="srow__p">₹180<small>/stem</small></span><span class="srow__thumb"><img src="img/flowers/ranunculus_yellow.webp" alt=""></span></li>
+    <li class="srow" data-flower="rose_mauve2" data-stem="rose_mauve"><span class="srow__i">04</span><span class="srow__n">Dusty Rose</span><span class="srow__l"><em>Rosa</em> 'Amnesia'</span><span class="srow__m">All year</span><span class="srow__p">₹260<small>/stem</small></span><span class="srow__thumb"><img src="img/flowers/rose_mauve2.webp" alt=""></span></li>
+    <li class="srow" data-flower="cherry" data-stem="wild"><span class="srow__i">05</span><span class="srow__n">Blossom Branch</span><span class="srow__l"><em>Prunus</em> serrulata</span><span class="srow__m">Feb — Mar</span><span class="srow__p">₹120<small>/stem</small></span><span class="srow__thumb"><img src="img/flowers/cherry.webp" alt=""></span></li>
+  </ul>
+  <div class="season__float" id="seasonFloat" aria-hidden="true"><img id="seasonImg" src="img/flowers/rose_blush.webp" alt=""></div>
 </section>
 
 <!-- ============ GARDEN ============ -->
@@ -207,7 +281,38 @@
         <button class="btn btn--primary btn--block" id="bookBtn" disabled data-perch><span>Reserve</span></button>
         <p class="fine">Free cancellation up to 48 hours before your visit.</p>
       </div>
+      <div class="incl glass" id="incl">
+        <p class="label">Included with every visit</p>
+        <ul>
+          <li><img src="img/flowers/rose_peach.webp" alt="">A welcome posy to take home</li>
+          <li><img src="img/flowers/ranunculus_white.webp" alt="">Rose-petal lemonade in the conservatory</li>
+          <li><img src="img/flowers/cherry.webp" alt="">A guided walk with a head gardener</li>
+        </ul>
+      </div>
     </div>
+  </div>
+</section>
+
+
+<!-- ============ JOURNAL ============ -->
+<section class="journal section" id="journal">
+  <header class="section__head">
+    <p class="eyebrow" data-reveal>The Journal</p>
+    <h2 class="display" data-bloom="sm" data-perch>Notes <em>from the</em> glasshouse</h2>
+  </header>
+  <div class="journal__grid">
+    <a href="#book" class="jcard jcard--big" data-perch data-cursor="Read">
+      <span class="jcard__img"><img src="img/garden/conservatory-2.webp" alt="Sunlit glasshouse full of roses" loading="lazy"></span>
+      <span class="jcard__b"><span class="jcard__t">Season notes · 6 min</span><span class="jcard__h">A winter under glass: how our roses bloom in December</span></span>
+    </a>
+    <a href="#atelier" class="jcard" data-perch data-cursor="Read">
+      <span class="jcard__img"><img src="img/garden/workshop.webp" alt="Florist table with ribbons and stems" loading="lazy"></span>
+      <span class="jcard__b"><span class="jcard__t">The atelier · 4 min</span><span class="jcard__h">The spiral hand-tie, explained</span></span>
+    </a>
+    <a href="#book" class="jcard" data-perch data-cursor="Read">
+      <span class="jcard__img"><img src="img/garden/dinner.webp" alt="Dinner table on the garden lawn" loading="lazy"></span>
+      <span class="jcard__b"><span class="jcard__t">Evenings · 3 min</span><span class="jcard__h">Setting a table among the roses</span></span>
+    </a>
   </div>
 </section>
 

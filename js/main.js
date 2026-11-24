@@ -394,7 +394,7 @@ function initAtelier(){
     const all = $$('.stage__stem', bq);
     const n = all.length, golden = Math.PI * (3 - Math.sqrt(5));
     all.forEach((s, i) => {
-      const r = 18 * Math.sqrt(i + .5) * (n > 14 ? 1.05 : 1.15);
+      const r = 30 * Math.sqrt(i + .5) * (n > 14 ? .92 : 1) * ($('#stage').clientWidth < 520 ? .75 : 1);
       const a = i * golden;
       const x = Math.cos(a) * r * 1.25, y = Math.sin(a) * r * .8 - (n > 1 ? 6 : 0);
       const sz = +s.dataset.size;
@@ -442,6 +442,7 @@ function initAtelier(){
     $('#atelierMeta').textContent = total ? `${total} stem${total > 1 ? 's' : ''} · hand-tying & wrap ₹350` : '0 stems';
     $('#atelierAdd').disabled = !total;
     $('#stageEmpty').style.opacity = total ? 0 : 1;
+    const sc = $('#stageCount b'); if (sc && +sc.textContent !== total) { sc.textContent = total; gsap.fromTo(sc, {scale: 1.6}, {scale: 1, duration: .6, ease: 'back.out(3)'}); }
     $('#wrapPaper').classList.toggle('is-on', total > 0);
   }
 }
@@ -639,7 +640,7 @@ function initChrome(){
   ScrollTrigger.create({start: 0, end: 'max', onUpdate: s => {
     const y = s.scroll(); $('#nav').classList.toggle('is-hidden', y > 300 && y > last && !$('#drawer').classList.contains('is-on')); last = y;
   }});
-  ['collection','atelier','garden','book'].forEach(id => ScrollTrigger.create({trigger: '#' + id, start: 'top 50%', end: 'bottom 50%',
+  ['collection','atelier','season','garden','book'].forEach(id => ScrollTrigger.create({trigger: '#' + id, start: 'top 50%', end: 'bottom 50%',
     onToggle: s => $$(`.nav__links a[href="#${id}"]`).forEach(a => a.classList.toggle('is-active', s.isActive))}));
   $$('[data-reveal]').forEach(el => {
     const inHero = el.closest('.hero');
@@ -660,6 +661,159 @@ function initChrome(){
   $('#newsForm').addEventListener('submit', e => { e.preventDefault(); $('#newsMsg').textContent = 'Thank you — the first letter arrives with spring. (Demo form.)'; e.target.reset(); const r = e.target.getBoundingClientRect(); petalBurst(r.left + r.width / 2, r.top, 16); });
 }
 
+
+/* ---------------------------------------------------------
+   V2 — CURSOR
+--------------------------------------------------------- */
+function initCursor(){
+  if (isTouch) return;
+  const c = $('#cursor'), lbl = $('#cursorLabel');
+  const xTo = gsap.quickTo(c, 'x', {duration: .45, ease: 'power3.out'}), yTo = gsap.quickTo(c, 'y', {duration: .45, ease: 'power3.out'});
+  let lx = 0, ly = 0, acc = 0;
+  addEventListener('pointermove', e => {
+    xTo(e.clientX); yTo(e.clientY);
+    acc += Math.hypot(e.clientX - lx, e.clientY - ly); lx = e.clientX; ly = e.clientY;
+    if (acc > 140 && !reduce) { acc = 0; trailPetal(e.clientX, e.clientY); }
+  }, {passive: true});
+  addEventListener('pointerdown', () => c.classList.add('is-down')); addEventListener('pointerup', () => c.classList.remove('is-down'));
+  const label = el => el.dataset.cursor || (el.closest('.card') ? 'Add' : el.closest('.gcard') ? 'View' : el.closest('.srow') ? 'Add stem' : el.closest('.exp') ? 'Choose' : '');
+  document.addEventListener('pointerover', e => {
+    const t = e.target.closest('[data-cursor], .card__media, .gcard, .srow, .exp');
+    const l = t ? label(t) : '';
+    c.classList.toggle('is-big', !!l); lbl.textContent = l;
+  });
+}
+function trailPetal(x, y){
+  const p = makePetal(); gsap.set(p, {x, y, scale: .45, rotate: Math.random() * 360, opacity: .85});
+  gsap.to(p, {x: x + (Math.random() - .5) * 60, y: y + 50 + Math.random() * 60, rotate: '+=' + (90 + Math.random() * 180), opacity: 0, scale: .2, duration: 1.6 + Math.random(), ease: 'power1.out', onComplete: () => p.remove()});
+}
+
+/* ---------------------------------------------------------
+   V2 — AMBIENT FLOWERS (fill the margins, parallax on scroll)
+--------------------------------------------------------- */
+const AMB = {
+  ritual:     [['peony2','l',8,  200,-30,.8],['cherry2','r',62,210,25,1.5],['rose_mauve2','l',78,150,-15,1.2]],
+  collection: [['rose_peach','r',6,220,20,.9],['wild','l',40,180,-12,1.4],['cherry','r',72,170,30,1.1]],
+  atelier:    [['vine2','l',10,170,-25,1.3],['ranunculus_white','r',30,190,0,.7],['peony','l',82,220,10,1]],
+  season:     [['cherry2','r',8,240,-10,1.2],['rose_blush','l',70,160,18,.9]],
+  book:       [['peony2','l',4,200,-20,1],['vine','r',46,170,22,1.4],['ranunculus_yellow','l',88,130,0,.8]],
+  journal:    [['rose_mauve','r',8,170,26,1.1],['wild','l',60,190,-10,1.3]],
+};
+function initAmbient(){
+  Object.entries(AMB).forEach(([id, list]) => {
+    const sec = $('#' + id); if (!sec) return;
+    list.forEach(([f, side, top, w, r, speed], i) => {
+      const d = document.createElement('div'); d.className = 'amb';
+      const sm = innerWidth < 700 ? .5 : 1;
+      Object.assign(d.style, {top: top + '%', width: w * sm + 'px', [side === 'l' ? 'left' : 'right']: (-w * sm * .32) + 'px'});
+      if (i === 2) d.style.setProperty('--b', '1.5px');
+      d.innerHTML = `<img src="${F(f)}" alt="">`; sec.prepend(d);
+      gsap.set(d, {rotate: r});
+      gsap.fromTo(d, {y: 160 * speed}, {y: -160 * speed, rotate: r + (side === 'l' ? 25 : -25), ease: 'none', scrollTrigger: {trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true}});
+      gsap.from($('img', d), {scale: 0, rotate: -120, duration: 1.6, ease: 'elastic.out(1,.5)', scrollTrigger: {trigger: d, start: 'top 95%'}});
+    });
+  });
+}
+
+/* ---------------------------------------------------------
+   V2 — HERO extras, film numerals
+--------------------------------------------------------- */
+function initHeroExtras(){
+  const chips = $$('.chip-g');
+  gsap.to(chips, {opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: .15, delay: 1.6, startAt: {y: 30}});
+  chips.forEach((c, i) => gsap.to(c, {y: i % 2 ? 14 : -14, x: i % 2 ? -8 : 8, duration: 3 + i * .6, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 2.8}));
+  if (!isTouch) addEventListener('pointermove', e => {
+    const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
+    chips.forEach((c, i) => gsap.to(c, {xPercent: nx * (20 + i * 10), yPercent: ny * (30 + i * 12), duration: 1.4, ease: 'power3.out', overwrite: 'auto'}));
+  });
+  gsap.to('.orbit', {yPercent: -40, opacity: 0, ease: 'none', scrollTrigger: {trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true}});
+  // film numerals follow the chapters
+  const nums = $$('#filmNum span'), wins = [[0, .33], [.33, .67], [.67, 1]];
+  ScrollTrigger.create({trigger: '#film', start: 'top top', end: 'bottom bottom', onUpdate: st => {
+    nums.forEach((n, i) => { const on = st.progress >= wins[i][0] && st.progress < wins[i][1] + (i === 2 ? .01 : 0); gsap.to(n, {opacity: on ? 1 : 0, scale: on ? 1 : .85, duration: .8, ease: 'power3.out', overwrite: 'auto'}); });
+  }});
+}
+
+/* ---------------------------------------------------------
+   V2 — RITUAL
+--------------------------------------------------------- */
+function initRitual(){
+  const path = $('#ritualPath'); const len = path.getTotalLength();
+  gsap.set(path, {strokeDasharray: len, strokeDashoffset: len});
+  gsap.to(path, {strokeDashoffset: 0, ease: 'none', scrollTrigger: {trigger: '.ritual__track', start: 'top 80%', end: 'bottom 50%', scrub: 1}});
+  gsap.from('.rstep', {y: 120, opacity: 0, rotate: i => (i % 2 ? 4 : -4), duration: 1.4, ease: 'expo.out', stagger: .14, scrollTrigger: {trigger: '.ritual__track', start: 'top 82%'}});
+  gsap.from('.rstep__f', {scale: 0, rotate: -180, duration: 1.6, ease: 'elastic.out(1,.5)', stagger: .14, delay: .3, scrollTrigger: {trigger: '.ritual__track', start: 'top 82%'}});
+  if (!isTouch) $$('.rstep').forEach(c => {
+    c.addEventListener('pointermove', e => { const r = c.getBoundingClientRect(); gsap.to(c, {rotateY: ((e.clientX - r.left) / r.width - .5) * 12, rotateX: (.5 - (e.clientY - r.top) / r.height) * 12, transformPerspective: 800, duration: .6, ease: 'power3.out'}); });
+    c.addEventListener('pointerleave', () => gsap.to(c, {rotateX: 0, rotateY: 0, duration: 1.2, ease: 'elastic.out(1,.4)'}));
+  });
+  $$('[data-count]').forEach(el => {
+    const to = +el.dataset.count, o = {v: 0};
+    ScrollTrigger.create({trigger: el, start: 'top 90%', once: true, onEnter: () => gsap.to(o, {v: to, duration: 2.2, ease: 'power3.out', onUpdate: () => el.textContent = Math.round(o.v)})});
+  });
+  gsap.from('.stat', {y: 50, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: .1, scrollTrigger: {trigger: '.stats', start: 'top 88%'}});
+}
+
+/* ---------------------------------------------------------
+   V2 — PRESETS + SEASON
+--------------------------------------------------------- */
+function applyPreset(map){
+  $$('#stems .stem').forEach(li => { const out = $('output', li); let n = +out.textContent; const minus = $('button[data-d="-1"]', li); while (n-- > 0) minus.click(); });
+  let delay = 350;
+  Object.entries(map).forEach(([id, n]) => {
+    const plus = $(`#stems .stem[data-id="${id}"] button[data-d="1"]`); if (!plus) return;
+    for (let i = 0; i < n; i++) { setTimeout(() => plus.click(), delay); delay += 110; }
+  });
+}
+function initPresetsSeason(){
+  $('#presets').addEventListener('click', e => {
+    const b = e.target.closest('.preset'); if (!b) return;
+    gsap.fromTo(b, {scale: .92}, {scale: 1, duration: .8, ease: 'elastic.out(1,.4)'});
+    applyPreset(JSON.parse(b.dataset.p));
+  });
+  gsap.from('.preset', {y: 40, opacity: 0, duration: 1, ease: 'expo.out', stagger: .07, scrollTrigger: {trigger: '#presets', start: 'top 88%'}});
+
+  const rows = $$('.srow'), fl = $('#seasonFloat'), img = $('#seasonImg');
+  gsap.from(rows, {y: 70, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: .08, scrollTrigger: {trigger: '#seasonList', start: 'top 85%'}});
+  if (!isTouch) {
+    const xTo = gsap.quickTo(fl, 'x', {duration: .7, ease: 'power3.out'}), yTo = gsap.quickTo(fl, 'y', {duration: .7, ease: 'power3.out'});
+    const rTo = gsap.quickTo(fl, 'rotate', {duration: 1, ease: 'power3.out'});
+    let lx = 0;
+    $('#seasonList').addEventListener('pointermove', e => { xTo(e.clientX - 150); yTo(e.clientY - 150); rTo((e.clientX - lx) * .8); lx = e.clientX; });
+    rows.forEach(r => r.addEventListener('pointerenter', () => {
+      img.src = F(r.dataset.flower);
+      gsap.fromTo(img, {scale: .6, rotate: -40}, {scale: 1, rotate: 0, duration: 1, ease: 'elastic.out(1,.55)'});
+    }));
+    $('#seasonList').addEventListener('pointerenter', () => gsap.to(fl, {opacity: 1, scale: 1, duration: .6, ease: 'back.out(2)'}));
+    $('#seasonList').addEventListener('pointerleave', () => gsap.to(fl, {opacity: 0, scale: .4, duration: .5, ease: 'power3.in'}));
+  }
+  rows.forEach(r => r.addEventListener('click', () => {
+    const rr = r.getBoundingClientRect(); petalBurst(rr.left + rr.width / 2, rr.top + rr.height / 2, 14);
+    const go = () => { const plus = $(`#stems .stem[data-id="${r.dataset.stem}"] button[data-d="1"]`); plus && plus.click(); toast(`${$('.srow__n', r).textContent} added to your composition`); };
+    lenis ? lenis.scrollTo('#atelier', {offset: 40, duration: 1.6, onComplete: () => setTimeout(go, 200)}) : ($('#atelier').scrollIntoView({behavior: 'smooth'}), setTimeout(go, 900));
+  }));
+}
+
+/* ---------------------------------------------------------
+   V2 — JOURNAL + velocity + extras
+--------------------------------------------------------- */
+function initJournal(){
+  gsap.from('.jcard', {y: 100, opacity: 0, clipPath: 'inset(30% 0 0 0 round 28px)', duration: 1.5, ease: 'expo.out', stagger: .12, scrollTrigger: {trigger: '.journal__grid', start: 'top 85%'}});
+  $$('.jcard').forEach(j => gsap.fromTo($('.jcard__img img', j), {yPercent: -6}, {yPercent: 6, ease: 'none', scrollTrigger: {trigger: j, start: 'top bottom', end: 'bottom top', scrub: true}}));
+  gsap.from('.incl li', {x: 40, opacity: 0, duration: 1, ease: 'expo.out', stagger: .1, scrollTrigger: {trigger: '#incl', start: 'top 92%'}});
+  // velocity skew on image-heavy grids
+  const skewEls = $$('.card__media, .jcard');
+  const setters = skewEls.map(el => gsap.quickTo(el, 'skewY', {duration: .5, ease: 'power3.out'}));
+  ScrollTrigger.create({onUpdate: st => { const v = gsap.utils.clamp(-3, 3, st.getVelocity() / -500); setters.forEach(s => s(v)); }});
+  ScrollTrigger.addEventListener('scrollEnd', () => setters.forEach(s => s(0)));
+  // lede paragraphs: soft word-by-word reveal
+  $$('.section__lede').forEach(p => {
+    p.removeAttribute('data-reveal'); gsap.set(p, {opacity: 1, y: 0});
+    p.innerHTML = p.textContent.split(' ').map(w => `<span class="ln" style="display:inline-block"><span>${w}</span></span>`).join(' ');
+    gsap.from($$('.ln>span', p), {yPercent: 110, duration: 1, ease: 'expo.out', stagger: .018, scrollTrigger: {trigger: p, start: 'top 90%'}});
+  });
+}
+
 /* ---------------------------------------------------------
    START
 --------------------------------------------------------- */
@@ -673,6 +827,13 @@ function start(){
   initBooking();
   initBag();
   initChrome();
+  initCursor();
+  initAmbient();
+  initHeroExtras();
+  initRitual();
+  initPresetsSeason();
+  initJournal();
+  ScrollTrigger.refresh();
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resizeDecos(); ScrollTrigger.refresh(); }, 200); });
   window.dispatchEvent(new Event('mf:ready'));
 }
